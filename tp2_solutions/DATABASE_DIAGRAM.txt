@@ -1,0 +1,202 @@
+============================================
+ALGERIAN HOSPITAL MANAGEMENT SYSTEM
+DATABASE DIAGRAM
+============================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SPECIALTIES                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK  specialty_id         INT                                                 │
+│     specialty_name       VARCHAR(100)  UNIQUE, NOT NULL                      │
+│     description          TEXT                                                │
+│     consultation_fee     DECIMAL(10,2) NOT NULL          ← NEW FIELD        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ▲
+                                    │ FK (ON DELETE RESTRICT, ON UPDATE CASCADE)
+                                    │
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              DOCTORS                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK  doctor_id            INT                                                 │
+│     last_name            VARCHAR(50)   NOT NULL                              │
+│     first_name           VARCHAR(50)   NOT NULL                              │
+│     email                VARCHAR(100)  UNIQUE, NOT NULL                      │
+│     phone                VARCHAR(20)                                         │
+│ FK  specialty_id         INT           NOT NULL                              │
+│     license_number       VARCHAR(20)   UNIQUE, NOT NULL  ← NEW FIELD        │
+│     hire_date            DATE                                                │
+│     office               VARCHAR(100)                                        │
+│     active               BOOLEAN       DEFAULT TRUE                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    ▲
+                                    │ FK (ON DELETE RESTRICT, ON UPDATE CASCADE)
+                                    │
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CONSULTATIONS                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK  consultation_id      INT                                                 │
+│ FK  patient_id           INT           NOT NULL                              │
+│ FK  doctor_id            INT           NOT NULL                              │
+│     consultation_date    DATETIME      NOT NULL          ← CHANGED TO DATETIME│
+│     reason               TEXT          NOT NULL          ← NEW FIELD        │
+│     diagnosis            TEXT                                                │
+│     observations         TEXT                            ← NEW FIELD        │
+│     blood_pressure       VARCHAR(20)                     ← NEW FIELD        │
+│     temperature          DECIMAL(4,2)                    ← NEW FIELD        │
+│     weight               DECIMAL(5,2)                    ← NEW FIELD        │
+│     height               DECIMAL(5,2)                    ← NEW FIELD        │
+│     status               ENUM          DEFAULT 'Scheduled' ← CHANGED TO ENUM│
+│                          ('Scheduled', 'In Progress', 'Completed', 'Cancelled')│
+│     amount               DECIMAL(10,2)                                       │
+│     paid                 BOOLEAN       DEFAULT FALSE     ← CHANGED FROM payment_status│
+│     notes                TEXT                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+                ▲                                   ▲
+                │                                   │
+                │ FK                                │ FK
+                │ (ON DELETE RESTRICT,              │ (ON DELETE CASCADE,
+                │  ON UPDATE CASCADE)               │  ON UPDATE CASCADE)
+                │                                   │
+┌───────────────────────────────┐    ┌──────────────────────────────────────┐
+│          PATIENTS             │    │        PRESCRIPTIONS                  │
+├───────────────────────────────┤    ├──────────────────────────────────────┤
+│ PK  patient_id        INT     │    │ PK  prescription_id       INT        │
+│     file_number   VARCHAR(20) │    │ FK  consultation_id       INT        │
+│                   UNIQUE       │    │     prescription_date   DATETIME     │
+│     last_name     VARCHAR(50) │    │                         DEFAULT NOW  │
+│     first_name    VARCHAR(50) │    │     treatment_duration    INT    ← NEW│
+│     date_of_birth DATE NOT NULL│   │     general_instructions TEXT   ← NEW│
+│     gender        ENUM('M','F')│   └──────────────────────────────────────┘
+│     blood_type    VARCHAR(5)  │                    │
+│     email         VARCHAR(100)│                    │ FK
+│     phone         VARCHAR(20) │                    │ (ON DELETE CASCADE,
+│                   NOT NULL     │                    │  ON UPDATE CASCADE)
+│     address       TEXT         │                    ▼
+│     city          VARCHAR(50)  │    ┌──────────────────────────────────────┐
+│     province      VARCHAR(50)  │◄─RENAMED│  PRESCRIPTION_DETAILS        │
+│                   FROM wilaya  │    ├──────────────────────────────────────┤
+│     registration_date DATE     │    │ PK  detail_id             INT    ← RENAMED│
+│     insurance     VARCHAR(100) │◄─NEW│ FK  prescription_id      INT        │
+│     insurance_number VARCHAR(50)│◄─NEW│ FK  medication_id        INT        │
+│     allergies     TEXT         │    │     quantity              INT        │
+│     medical_history TEXT       │◄─NEW│                          CHECK>0    │
+│     emergency_contact VARCHAR  │    │     dosage_instructions VARCHAR(200)│
+│     emergency_phone VARCHAR    │    │     duration              INT    ← RENAMED│
+└───────────────────────────────┘    │     total_price        DECIMAL ← NEW│
+                                      └──────────────────────────────────────┘
+                                                      │
+                                                      │ FK
+                                                      │ (ON DELETE RESTRICT,
+                                                      │  ON UPDATE CASCADE)
+                                                      ▼
+                                      ┌──────────────────────────────────────┐
+                                      │         MEDICATIONS                  │
+                                      ├──────────────────────────────────────┤
+                                      │ PK  medication_id         INT        │
+                                      │     medication_code   VARCHAR(20)    │
+                                      │                       UNIQUE          │
+                                      │     commercial_name   VARCHAR(150)   │
+                                      │     generic_name      VARCHAR(150)◄─RENAMED│
+                                      │                       FROM scientific_name│
+                                      │     form              VARCHAR(50) ◄─NEW│
+                                      │     dosage            VARCHAR(50) ◄─NEW│
+                                      │     manufacturer      VARCHAR(100)    │
+                                      │     unit_price        DECIMAL(10,2)  │
+                                      │     available_stock   INT            │
+                                      │     minimum_stock     INT            │
+                                      │     expiration_date   DATE           │
+                                      │     prescription_required BOOLEAN ◄─NEW│
+                                      │                       DEFAULT TRUE   │
+                                      │     reimbursable      BOOLEAN     ◄─NEW│
+                                      │                       DEFAULT FALSE  │
+                                      │     description       TEXT           │
+                                      └──────────────────────────────────────┘
+
+============================================
+INDEXES (Performance Optimization)
+============================================
+
+patients:
+  - idx_patients_name (last_name, first_name)
+
+consultations:
+  - idx_consultations_date (consultation_date)
+  - idx_consultations_patient (patient_id)
+  - idx_consultations_doctor (doctor_id)
+
+medications:
+  - idx_medications_name (commercial_name)
+
+prescriptions:
+  - idx_prescriptions_consultation (consultation_id)
+
+============================================
+KEY RELATIONSHIPS
+============================================
+
+1. ONE specialty → MANY doctors
+   - A specialty can have multiple doctors
+   - Each doctor belongs to one specialty
+
+2. ONE doctor → MANY consultations
+   - A doctor can perform many consultations
+   - Each consultation is done by one doctor
+
+3. ONE patient → MANY consultations
+   - A patient can have many consultations
+   - Each consultation is for one patient
+
+4. ONE consultation → ONE prescription (optional)
+   - A consultation may generate a prescription
+   - Each prescription belongs to one consultation
+
+5. ONE prescription → MANY prescription_details
+   - A prescription can contain multiple medications
+   - Each detail line belongs to one prescription
+
+6. ONE medication → MANY prescription_details
+   - A medication can appear in many prescriptions
+   - Each detail line references one medication
+
+============================================
+MAIN CHANGES FROM ORIGINAL VERSION
+============================================
+
+✓ Added consultation_fee to specialties
+✓ Added license_number to doctors
+✓ Renamed wilaya → province in patients
+✓ Added insurance, insurance_number, medical_history to patients
+✓ Completely restructured consultations:
+  - Changed consultation_date to DATETIME
+  - Added reason, observations
+  - Added vital signs: blood_pressure, temperature, weight, height
+  - Changed status to ENUM
+  - Changed payment_status → paid (BOOLEAN)
+✓ Renamed prescription_medications → prescription_details
+✓ Renamed scientific_name → generic_name in medications
+✓ Added form, dosage, prescription_required, reimbursable to medications
+✓ Added treatment_duration, general_instructions to prescriptions
+✓ Added total_price to prescription_details
+✓ Added proper ON DELETE/UPDATE CASCADE rules
+✓ Updated indexes to teacher's requirements
+
+============================================
+DATA STATISTICS
+============================================
+
+- Specialties: 10
+- Doctors: 17
+- Patients: 25
+- Consultations: 30
+- Medications: 25
+- Prescriptions: 30
+- Prescription Details: 70+
+
+============================================
+ALGERIAN CONTEXT
+============================================
+
+Currency: DZD (Dinar Algérien)
+Insurance: CNAS, CASNOS
+Manufacturers: SAIDAL, BIOPHARM, IBN SINA
+Provinces: Alger, Béjaïa, Sidi-Bel-Abbès

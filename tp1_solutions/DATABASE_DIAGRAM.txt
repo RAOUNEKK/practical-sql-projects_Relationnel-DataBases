@@ -1,0 +1,295 @@
+# DIAGRAMME DE LA BASE DE DONNÉES - SYSTÈME UNIVERSITAIRE ALGÉRIEN
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│          SYSTÈME DE GESTION UNIVERSITAIRE ALGÉRIEN                          │
+│                  Diagramme du Schéma de Base de Données                     |                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════╗
+║    DEPARTMENTS        ║
+║   (Départements)      ║
+╠═══════════════════════╣
+║ PK department_id      ║
+║    department_name    ║
+║    budget (DZD)       ║
+║    building           ║
+║    created_date       ║
+╚═══════════════════════╝
+         │ 1
+         │
+         │ possède plusieurs
+         ├───────────────────────────────────────────────┐
+         │                                               │
+         │ N                                             │ N
+╔═══════════════════════╗                   ╔═══════════════════════╗
+║    PROFESSORS         ║                   ║     STUDENTS          ║
+║   (Professeurs)       ║                   ║    (Étudiants)        ║
+╠═══════════════════════╣                   ╠═══════════════════════╣
+║ PK professor_id       ║                   ║ PK student_id         ║
+║    last_name          ║                   ║    matricule          ║
+║    first_name         ║                   ║    last_name          ║
+║    email              ║                   ║    first_name         ║
+║    specialization     ║                   ║    email              ║
+║ FK department_id      ║                   ║    level (L1-L3)      ║
+║    hire_date          ║                   ║ FK department_id      ║
+╚═══════════════════════╝                   ║    enrollment_date    ║
+         │ 1                                 ╚═══════════════════════╝
+         │                                             │ 1
+         │ enseigne                                    │
+         │                                             │ s'inscrit à
+         │ N                                           │ N
+╔═══════════════════════╗                   ╔═══════════════════════╗
+║      COURSES          ║                   ║    ENROLLMENTS        ║
+║       (Cours)         ║                   ║   (Inscriptions)      ║
+╠═══════════════════════╣                   ╠═══════════════════════╣
+║ PK course_id          ║───────────────────║ PK enrollment_id      ║
+║    course_code        ║ N              1  ║ FK student_id         ║
+║    course_name        ║    possède        ║ FK course_id          ║
+║    credits            ║                   ║    enrollment_date    ║
+║    semester           ║                   ║    status             ║
+║    max_capacity       ║                   ╚═══════════════════════╝
+║ FK department_id      ║
+║ FK professor_id       ║
+╚═══════════════════════╝
+         │ 1
+         │
+         │ a des
+         │
+         │ N
+╔═══════════════════════╗
+║       GRADES          ║
+║       (Notes)         ║
+╠═══════════════════════╣
+║ PK grade_id           ║
+║ FK student_id         ║
+║ FK course_id          ║
+║    evaluation_type    ║
+║    grade (sur 20)     ║
+║    coefficient        ║
+║    evaluation_date    ║
+╚═══════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                         RÉSUMÉ DES RELATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. DEPARTMENTS ──< PROFESSORS    (Un-à-Plusieurs)
+   - Un département a plusieurs professeurs
+   - Chaque professeur appartient à un département
+
+2. DEPARTMENTS ──< STUDENTS      (Un-à-Plusieurs)
+   - Un département a plusieurs étudiants
+   - Chaque étudiant appartient à un département
+
+3. DEPARTMENTS ──< COURSES       (Un-à-Plusieurs)
+   - Un département offre plusieurs cours
+   - Chaque cours appartient à un département
+
+4. PROFESSORS ──< COURSES        (Un-à-Plusieurs)
+   - Un professeur enseigne plusieurs cours
+   - Chaque cours est enseigné par un professeur
+
+5. STUDENTS ──< ENROLLMENTS >──  COURSES (Plusieurs-à-Plusieurs)
+   - Un étudiant peut s'inscrire à plusieurs cours
+   - Un cours peut avoir plusieurs étudiants
+   - ENROLLMENTS est la table de jonction
+
+6. STUDENTS ──< GRADES >──  COURSES (Plusieurs-à-Plusieurs)
+   - Un étudiant peut avoir des notes dans plusieurs cours
+   - Un cours peut avoir des notes pour plusieurs étudiants
+   - GRADES stocke les enregistrements d'évaluation
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        STATISTIQUES DES DONNÉES
+═══════════════════════════════════════════════════════════════════════════════
+
+DÉPARTEMENTS:    5 enregistrements
+  - Informatique, Mathématiques, Physique, Gestion, Génie Électrique
+
+PROFESSEURS:     13 enregistrements
+  - Informatique: 4 professeurs
+  - Mathématiques: 3 professeurs
+  - Physique: 2 professeurs
+  - Gestion: 2 professeurs
+  - Génie Électrique: 2 professeurs
+
+ÉTUDIANTS:       20 enregistrements (Noms réels ESI 2025)
+  - L3 (Troisième année): 6 étudiants
+  - L2 (Deuxième année): 5 étudiants
+  - L1 (Première année): 9 étudiants
+
+COURS:           20 enregistrements
+  - Plage de crédits: 4-7 par cours
+  - Semestre 1: 13 cours
+  - Semestre 2: 7 cours
+
+INSCRIPTIONS:    48 enregistrements
+  - Réussi (Passed): 16 inscriptions
+  - Échoué (Failed): 1 inscription
+  - Actif (Active): 31 inscriptions
+
+NOTES:           40+ enregistrements d'évaluation
+  - Notes vont de 7.5 à 18.0 (sur 20)
+  - Types: Contrôle (40%) et Examen (60%)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    DÉFINITIONS DES CHAMPS CLÉS
+═══════════════════════════════════════════════════════════════════════════════
+
+STUDENTS.matricule:
+  - Numéro d'inscription unique de l'étudiant
+  - Format: 232332029109 (12 chiffres)
+
+
+STUDENTS.level:
+  - L1 = Première année (Licence 1)
+  - L2 = Deuxième année (Licence 2)
+  - L3 = Troisième année (Licence 3)
+  - M1 = Première année Master
+  - M2 = Deuxième année Master
+
+ENROLLMENTS.status:
+  - Active = Actuellement inscrit
+  - Passed = Terminé avec succès
+  - Failed = N'a pas réussi
+  - Withdrawn = A abandonné le cours
+
+GRADES.evaluation_type:
+  - Contrôle = Examen de mi-semestre (40%)
+  - Examen = Examen de fin de semestre (60%)
+  - TP = Travaux Pratiques
+  - TD = Travaux Dirigés
+
+GRADES.grade:
+  - Note sur 20 (système algérien)
+  - Note minimale de passage: 10/20
+  - Excellent: 16-20
+  - Bien: 14-16
+  - Assez bien: 12-14
+  - Passable: 10-12
+
+GRADES.coefficient:
+  - Poids de l'évaluation
+  - Typiquement 0.4 pour contrôle, 0.6 pour examen
+  - Utilisé pour calculer la moyenne pondérée
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                       CONTRAINTES DE TABLES
+═══════════════════════════════════════════════════════════════════════════════
+
+CLÉS PRIMAIRES (PK):
+  - Toutes les tables ont une clé primaire entière auto-incrémentée
+
+CLÉS ÉTRANGÈRES (FK):
+  - professors.department_id → departments.department_id
+  - students.department_id → departments.department_id
+  - courses.department_id → departments.department_id
+  - courses.professor_id → professors.professor_id
+  - enrollments.student_id → students.student_id
+  - enrollments.course_id → courses.course_id
+  - grades.student_id → students.student_id
+  - grades.course_id → courses.course_id
+
+CONTRAINTES UNIQUES:
+  - professors.email (doit être unique)
+  - students.email (doit être unique)
+  - students.matricule (doit être unique)
+  - courses.course_code (doit être unique)
+  - enrollments(student_id, course_id) - unique composite
+
+INDEX:
+  - 8 index créés sur les clés étrangères pour optimisation
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    RÈGLES MÉTIER APPLIQUÉES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Chaque professeur doit appartenir à un département
+2. Chaque étudiant doit appartenir à un département
+3. Chaque cours doit être enseigné par un professeur et appartenir à un département
+4. Un étudiant ne peut s'inscrire qu'une seule fois à un cours (contrainte unique)
+5. Les notes sont enregistrées par étudiant par cours par type d'évaluation
+6. Les adresses e-mail doivent être uniques pour tous les professeurs et étudiants
+7. Les codes de cours doivent être uniques
+8. Les matricules d'étudiants doivent être uniques
+9. Note minimale: 0, Note maximale: 20
+10. Coefficient entre 0 et 1 pour les pondérations
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                      SPÉCIFICITÉS ALGÉRIENNES
+═══════════════════════════════════════════════════════════════════════════════
+
+SYSTÈME ÉDUCATIF:
+  - Enseignement supérieur public GRATUIT
+  - Pas de frais de scolarité
+  - Budget de l'État en DZD (Dinar Algérien)
+  - Système LMD: Licence (3 ans), Master (2 ans), Doctorat
+
+NOMS D'ÉTUDIANTS:
+  - Tirés de la vraie liste de candidats ESI juillet 2025
+  - Noms authentiques algériens
+  - Reflète la diversité des noms algériens
+
+NOTATION:
+  - Échelle 0-20 (système français adopté)
+  - Moyenne de passage: 10/20
+  - Mention Passable: 10-12
+  - Mention Assez Bien: 12-14
+  - Mention Bien: 14-16
+  - Mention Très Bien: 16-20
+
+ÉVALUATIONS:
+  - Contrôle Continu (CC): Évaluations en cours de semestre
+  - Examen Final: Examen de fin de semestre
+  - Pondération typique: CC 40%, Examen 60%
+
+DÉPARTEMENTS:
+  - Informatique = Computer Science
+  - Mathématiques = Mathematics
+  - Physique = Physics
+  - Gestion = Management/Business
+  - Génie Électrique = Electrical Engineering
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                     EXEMPLES D'ÉTUDIANTS
+═══════════════════════════════════════════════════════════════════════════════
+
+EXCELLENTS (Moyenne > 16):
+  1. Abadelia Mohammed Imad Eddine (Informatique L3) - 16.07/20
+  2. Ait Fella Anissa (Mathématiques L3) - 16.93/20
+ 
+
+BONS (Moyenne 13-16):
+  1. Abbaci Ilham (Informatique L3) - 12.03/20 (1 échec)
+  2. Abid Saadia (Informatique L2) - 14.60/20
+  3. Abida Hiba (Informatique L2) - 15.65/20
+  4. Ali Abderrahmane Fiche (Math L3) - 14.75/20
+  5. Bechiche Toufik (Gestion L3) - 15.83/20
+   
+MOYENS (Moyenne 10-13):
+  1. Alili Khadidja (Mathématiques L2) - 11.60/20
+  2. Belaidi Walid (Génie Électrique L3) - 13.65/20
+
+NOUVEAUX (Pas encore de notes):
+  - Adjal Anes, Ahdibi Khanssa, Aouya Oussama
+  - Baghdadi Ichrak, Bahi Adem, Bedrane Sid Ali
+  - Bekki Mustapha, Belaiouar Abderraouf
+  - Belfaci Younes, Belghait Mohamed
+
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+**Remarques importantes:**
+- Tous les budgets sont en DZD (Dinar Algérien)
+- Pas de salaires stockés (simplification)
+- Système de notation: 0-20 
+
