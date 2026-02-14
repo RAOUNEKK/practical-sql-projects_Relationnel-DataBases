@@ -1,0 +1,50 @@
+# ============================================
+# .gitignore pour practical-sql-projects
+# ============================================
+
+# Fichiers de base de données
+*.sql.bak
+*.dump
+*.sqlite
+*.db
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Fichiers système Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Fichiers système Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Fichiers système Linux
+*~
+
+# IDEs et éditeurs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Dossiers temporaires
+tmp/
+temp/
+cache/
+
+# Fichiers de configuration locale
+config.local.sql
+credentials.txt
